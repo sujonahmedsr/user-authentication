@@ -1,12 +1,23 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../assets/AuthProvider/AuthProvider";
+import { GrHide } from "react-icons/gr";
+import { BiShow } from "react-icons/bi";
 
 const Registration = () => {
+    const [regError, setResError] = useState(null);
+    const [resSuccess, setResSuccess] = useState(null);
 
-    const {createUser} = useContext(AuthContext);
+    const [show, setShow] = useState(false)
+
+    const { createUser } = useContext(AuthContext);
 
     const navigate = useNavigate()
+
+
+    
+
+
 
     const handleRegistration = e => {
         e.preventDefault();
@@ -14,17 +25,29 @@ const Registration = () => {
         const password = e.target.password.value;
         // console.log(name, email, password);
 
+        setResSuccess('')
+        setResError('')
+
+        if (password.length < 6) {
+            setResError('Password should be at least 6 characters')
+            return
+        }else if(!/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[a-zA-Z!#$%&? "])[a-zA-Z0-9!#$%&?]{8,20}$/.test(password)){
+            setResError('Your password should be one uppercase, on lowercase, on number and symble.')
+            return
+        }
 
         createUser(email, password)
-        .then(result =>{
-            console.log(result.user);
-        })
-        .catch(error =>{
-            console.log(error);
-        })
+            .then(result => {
+                console.log(result.user);
+                setResSuccess('User Created Successfully')
+            })
+            .catch(error => {
+                console.log(error);
+                setResError('email-already-in-use')
+            })
 
         e.target.reset();
-        navigate('/login')
+        navigate('/')
 
 
 
@@ -55,13 +78,18 @@ const Registration = () => {
                                 <label className="block mb-2 text-sm">Email address</label>
                                 <input type="email" name="email" id="email" placeholder="email" className="w-full px-3 py-2 border rounded-md border-gray-700 bg-gray-900 text-gray-100" required />
                             </div>
-                            <div>
+                            <div className="relative">
                                 <div className="flex justify-between mb-2">
                                     <label className="text-sm" >Password</label>
-
                                 </div>
-                                <input type="password" name="password" id="password" placeholder="*****" className="w-full px-3 py-2 border rounded-md border-gray-700 bg-gray-900 text-gray-100" required />
+                                <input type={show ? 'text' : 'password'} name="password" id="password" placeholder="*****" className="w-full px-3 py-2 border rounded-md border-gray-700 bg-gray-900 text-gray-100 relative" required maxLength={8}/>
+                                <span className="absolute text-2xl cursor-pointer top-1/2 right-2" onClick={()=>setShow(!show)}>{show ?  <BiShow></BiShow> : <GrHide></GrHide>}</span>
                             </div>
+
+                            {
+                                regError && <p className="text-red-700">{regError}</p>
+                            }
+
                         </div>
                         <div className="space-y-2">
                             <div>
@@ -72,6 +100,10 @@ const Registration = () => {
                             </p>
                         </div>
                     </form>
+                    {
+                        resSuccess && <p className="text-green-700">{resSuccess}</p>
+                    }
+
                 </div>
             </div>
         </div>

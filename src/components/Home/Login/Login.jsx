@@ -1,8 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../../../assets/AuthProvider/AuthProvider";
 
 const Login = () => {
+    const [loginError, setLoginError] = useState(null);
 
     const { signInUser } = useContext(AuthContext)
     const navigate = useNavigate();
@@ -10,8 +11,15 @@ const Login = () => {
     const handleFormSubmit = e => {
         e.preventDefault();
 
+        setLoginError('');
+
         const email = e.target.email.value;
         const password = e.target.password.value;
+
+        if(password.length < 6){
+            setLoginError('password should be at least 6 characters')
+            return
+        }
 
 
         signInUser(email, password)
@@ -19,7 +27,8 @@ const Login = () => {
             console.log(result.user)
         })
         .catch(error => {
-            console.log(error);
+            console.log(error.message);
+            setLoginError('User Not Created. Please Register Now.')
         })
 
         e.target.reset()
@@ -52,6 +61,9 @@ const Login = () => {
                     <input className="block w-full p-3 text-center rounded-sm text-gray-900   bg-violet-400 cursor-pointer" type="submit" value="Sign in" />
 
                 </form>
+                {
+                    loginError && <p className="text-red-700">{loginError}</p>
+                }
                 <div className="flex items-center pt-4 space-x-1">
                     <div className="flex-1 h-px sm:w-16 bg-gray-700"></div>
                     <p className="px-3 text-sm  text-gray-400">Login with social accounts</p>
